@@ -14,12 +14,12 @@ def main(config):
     if tf.__version__[:3] != '1.1':
         sys.exit('***NOTE!***: FIRST RUN:\n"source ~/began/BEGAN-tensorflow/tf1.1/bin/activate"')
     # NOTE: Other setup requirements.
-    print('REQUIREMENTS:\n  1. The file "target_num_user_weights.txt" should '
+    print('\nREQUIREMENTS:\n  1. The file "target_num_user_weights.npy" should '
         'contain the user-provided labels for the desired target number.\n  '
-        '2. In trainer_iwgn.py, "target_num" must be set, and match the '
-        'class of the user-provided labels.\n  3. In trainer_iwgn.py, '
+        '2. Use the flag --mnist_class to set the class of MNIST digit that'
+        'matches that of the user-provided labels.\n  3. In trainer_iwgn.py, '
         '"num_user_labeled" must correspond to the number of labels in '
-        '"target_num_user_weights.txt".')
+        '"target_num_user_weights.npy".')
     print('Press "c" to continue.')
     pdb.set_trace()
 

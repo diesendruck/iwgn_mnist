@@ -118,6 +118,7 @@ class Trainer(object):
         self.data_loader = data_loader
         self.data_loader_target = data_loader_target
         self.dataset = config.dataset
+        self.mnist_class = config.mnist_class
 
         self.optimizer = config.optimizer
         self.batch_size = config.batch_size
@@ -461,8 +462,8 @@ class Trainer(object):
 
 
     def prep_data(self, split='user', n=100):
-        # NOTE: This must correspond to the target_num_user_weights.txt file.
-        target_num = 7
+        # NOTE: This must correspond to the target_num_user_weights.npy file.
+        target_num = self.mnist_class
         print('\n\nFetching only number {}.\n\n'.format(target_num))
 
         def fetch_and_prep(zipped_images_and_labels):
@@ -566,7 +567,7 @@ class Trainer(object):
 
         # CREATE UPSAMPLED VERSIONS FOR LINE PLOTS. ###########################
         # Get upsample weights for data.
-        num_to_lineplot = 1000
+        num_to_lineplot = 100
         d = self.get_n_images(num_to_lineplot, self.images_train)
         d_weights = self.predict_weights(d).flatten()
         d_weights_up = []
@@ -606,17 +607,35 @@ class Trainer(object):
         # PLOT SORTED WEIGHTS. ################################################
         # Make line graph to show differences of distributions.
         plt.figure(figsize=(5, 5))
-        plt.plot(np.linspace(0, 1, len(d_plot)), d_plot, color='gray', marker='.', label='data')
-        plt.plot(np.linspace(0, 1, len(d_plot_up)), d_plot_up, color='red', marker='.', label='up')
-        plt.plot(np.linspace(0, 1, len(g_plot)), g_plot, color='green', marker='.', label='gens')
-        plt.xlabel('Ordered sample')
-        plt.ylabel('CDF, predicted weight')
-        plt.legend()
-        plt.title('KS(gens, up). dist={:.2f}, p={:.3f}'.format(ks_dist, ks_pval))
-        plt.subplots_adjust(bottom=.25, left=.25)
-        plt.savefig('{}/sorted_lines{}.png'.format(self.model_dir, step))
-        plt.legend()
-        plt.close()
+
+
+        sparser_plot = 0
+        if sparser_plot:
+            plt.plot(np.linspace(0, 1, len(d_plot[::30])), d_plot[::30], color='gray', marker='.', label='data')
+            plt.plot(np.linspace(0, 1, len(d_plot_up[::30])), d_plot_up[::30], color='red', marker='*', label='up')
+            plt.plot(np.linspace(0, 1, len(g_plot[::30])), g_plot[::30], color='green', marker='+', label='gens')
+            plt.xlabel('Ordered sample')
+            plt.ylabel('CDF, predicted weight')
+            plt.legend()
+            plt.title('KS(gens, up). dist={:.2f}, p={:.3f}'.format(ks_dist, ks_pval))
+            plt.subplots_adjust(bottom=.25, left=.25)
+            plt.savefig('{}/sorted_lines{}.png'.format(self.model_dir, step))
+            plt.legend()
+            plt.close()
+        else:
+            plt.plot(np.linspace(0, 1, len(d_plot)), d_plot, color='gray', marker='.', label='data')
+            plt.plot(np.linspace(0, 1, len(d_plot_up)), d_plot_up, color='red', marker='*', label='up')
+            plt.plot(np.linspace(0, 1, len(g_plot)), g_plot, color='green', marker='+', label='gens')
+            plt.xlabel('Ordered sample')
+            plt.ylabel('CDF, predicted weight')
+            plt.legend()
+            plt.title('KS(gens, up). dist={:.2f}, p={:.3f}'.format(ks_dist, ks_pval))
+            plt.subplots_adjust(bottom=.25, left=.25)
+            plt.savefig('{}/sorted_lines{}.png'.format(self.model_dir, step))
+            plt.legend()
+            plt.close()
+
+
 
 
     def train(self):
@@ -635,8 +654,7 @@ class Trainer(object):
         # NOTE: Choose scaling to apply to weights.
         #self.images_user_weights = 1.8 ** np.loadtxt(
         #    'target_num_user_weights.txt', delimiter=',')
-        self.images_user_weights = 1. + np.loadtxt(
-            'target_num_user_weights.txt', delimiter=',')  # These are the raw user-defined scores.
+        self.images_user_weights = np.load('target_num_user_weights.npy')  # These are the raw user-defined scores.
         self.user_weights_min = np.min(self.images_user_weights)
         self.images_train = self.prep_data(split='train', n=8000)
 

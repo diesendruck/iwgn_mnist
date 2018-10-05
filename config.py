@@ -35,6 +35,8 @@ data_arg.add_argument('--num_worker', type=int, default=4)
 data_arg.add_argument('--target_num', type=int, default=2000,
                       help=('# of target samples, used to sample target group '
                             'mean and covariance'))
+data_arg.add_argument('--mnist_class', type=int, default=7,
+                      help=('class of MNIST to fetch for self-normalized examples'))
 
 # Training / test parameters
 train_arg = add_argument_group('Training')
